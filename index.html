@@ -116,7 +116,7 @@
             border-radius: 3px;
         }
     </style>
-<meta property="og:title" content="منصة الدعوات الإلكترونية والماسح الذكي - خدمة ثانوي بنات" data-id="th-modified" ><meta name="description" content="code_artifact (1)" data-id="th-modified" ><meta property="og:description" content="code_artifact (1)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://tan-wendi-66.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="tan-wendi-66.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+<meta property="og:title" content="منصة الدعوات الإلكترونية والماسح الذكي - خدمة ثانوي بنات" data-id="th-modified" ><meta name="description" content="code_artifact (2)" data-id="th-modified" ><meta property="og:description" content="code_artifact (2)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://copper-gwendolyn-11.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="copper-gwendolyn-11.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-pink-500 selection:text-white">
 
     <!-- Header Navigation -->
@@ -499,6 +499,43 @@
         let qrScanner = null;
         let pendingDeleteId = null; // for individual delete
         let isDeletingAll = false;
+        let lastScannedCode = null;
+        let lastScanTime = 0;
+
+        // Audio Context Synthesizer for scan feedback sounds
+        function playScanSound(type) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'success') {
+                    // Double chime tone for successful check-in
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'warning' || type === 'error') {
+                    // Alarm buzz tone for duplicate scan / invalid code
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
+                    osc.frequency.setValueAtTime(140, ctx.currentTime + 0.18);
+                    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.4);
+                }
+            } catch (e) {
+                console.log('Audio playback unsupported or blocked', e);
+            }
+        }
 
         // On Load Initialization
         window.onload = function() {
@@ -778,6 +815,8 @@
             document.getElementById('scanner-modal').classList.remove('hidden');
             const toast = document.getElementById('scan-result-toast');
             toast.classList.add('hidden');
+            lastScannedCode = null;
+            lastScanTime = 0;
 
             if (!qrScanner) {
                 qrScanner = new Html5Qrcode("qr-reader");
@@ -810,26 +849,69 @@
         }
 
         function onScanSuccess(decodedText) {
+            const now = Date.now();
+            const cleanCode = decodedText.trim();
+            
+            // Prevent spamming identical scans within 2.5 seconds
+            if (cleanCode === lastScannedCode && (now - lastScanTime) < 2500) {
+                return;
+            }
+            
+            lastScannedCode = cleanCode;
+            lastScanTime = now;
+
             const toast = document.getElementById('scan-result-toast');
-            const match = invitations.find(i => i.id === decodedText.trim());
+            const match = invitations.find(i => i.id === cleanCode);
 
             if (match) {
                 if (!match.attended) {
+                    // FIRST SCAN: ENTRY GRANTED
                     match.attended = true;
+                    match.scanCount = 1;
                     match.attendedTime = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
                     saveInvitations();
                     updateStats();
                     renderAttendeesTable();
+                    playScanSound('success');
 
-                    toast.className = "p-3 rounded-xl text-xs font-bold text-center bg-emerald-950 text-emerald-300 border border-emerald-500/40";
-                    toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم تسجيل حضور: <b>${match.name}</b> بنجاح!`;
+                    toast.className = "p-4 rounded-2xl text-xs font-bold text-center bg-emerald-950/90 text-emerald-300 border-2 border-emerald-500 shadow-lg shadow-emerald-500/30 transition-all duration-300";
+                    toast.innerHTML = `
+                        <div class="flex items-center justify-center gap-2 text-sm text-emerald-400 mb-1 font-black">
+                            <i class="fa-solid fa-circle-check text-xl"></i>
+                            <span>تم الدخول بنجاح!</span>
+                        </div>
+                        <div class="text-white text-base font-extrabold my-1">${match.name}</div>
+                        <div class="text-[11px] text-emerald-200/90"><i class="fa-solid fa-graduation-cap"></i> ${match.grade} • ${match.attendedTime}</div>
+                    `;
                 } else {
-                    toast.className = "p-3 rounded-xl text-xs font-bold text-center bg-amber-950 text-amber-300 border border-amber-500/40";
-                    toast.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <b>${match.name}</b> مسجلة حضور بالفعل سابقاً!`;
+                    // DUPLICATE SCAN: ALARM & WARNING
+                    match.scanCount = (match.scanCount || 1) + 1;
+                    saveInvitations();
+                    playScanSound('warning');
+
+                    toast.className = "p-4 rounded-2xl text-xs font-bold text-center bg-red-950/95 text-red-200 border-2 border-red-500 shadow-xl shadow-red-600/40 transition-all duration-300";
+                    toast.innerHTML = `
+                        <div class="flex items-center justify-center gap-2 text-sm text-red-400 mb-1 font-black">
+                            <i class="fa-solid fa-triangle-exclamation text-xl text-rose-400 animate-pulse"></i>
+                            <span>🚨 إنذار: تم استخدام الدعوة مسبقاً!</span>
+                        </div>
+                        <div class="text-white text-base font-extrabold my-1">${match.name}</div>
+                        <div class="text-xs text-amber-300 font-bold mb-1">دخلت القاعة بالفعل الساعة: (${match.attendedTime || 'سابقاً'})</div>
+                        <div class="text-[10px] text-red-300/80">عدد مرات مسح الرمز: ${match.scanCount} مرة</div>
+                    `;
                 }
             } else {
-                toast.className = "p-3 rounded-xl text-xs font-bold text-center bg-rose-950 text-rose-300 border border-rose-500/40";
-                toast.innerHTML = `<i class="fa-solid fa-xmark"></i> رمز غير معروف: (${decodedText})`;
+                // INVALID CODE
+                playScanSound('error');
+                toast.className = "p-4 rounded-2xl text-xs font-bold text-center bg-slate-900 text-rose-300 border-2 border-rose-500/50 shadow-md";
+                toast.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 text-sm text-rose-400 mb-1 font-black">
+                        <i class="fa-solid fa-circle-xmark text-xl"></i>
+                        <span>رمز QR غير معروف!</span>
+                    </div>
+                    <div class="text-[11px] text-slate-300 font-mono my-1">${cleanCode}</div>
+                    <div class="text-[10px] text-slate-400">هذا الرمز غير مسجل بقائمة مدعوات الخدمة</div>
+                `;
             }
             toast.classList.remove('hidden');
         }
