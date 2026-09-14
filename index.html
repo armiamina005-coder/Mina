@@ -44,7 +44,7 @@
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
         ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 3px; }
     </style>
-<meta property="og:title" content="تطبيق الدعوات الإلكترونية والماسح الذكي" data-id="th-modified" ><meta name="description" content="code_artifact (2)" data-id="th-modified" ><meta property="og:description" content="code_artifact (2)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://indigo-kate-40.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="indigo-kate-40.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+<meta property="og:title" content="تطبيق الدعوات الإلكترونية والماسح الذكي" data-id="th-modified" ><meta name="description" content="code_artifact (4)" data-id="th-modified" ><meta property="og:description" content="code_artifact (4)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://maroon-robbie-43.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="maroon-robbie-43.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
 <body class="p-3 md:p-6 pb-20">
 
     <header class="max-w-4xl mx-auto mb-6">
@@ -64,7 +64,7 @@
                 </div>
             </div>
 
-            <!-- Sync Indicator & Room Control -->
+            <!-- Sync Indicator & Navigation -->
             <div class="flex items-center gap-2">
                 <div id="syncStatusBadge" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-amber-400 badge-pulse"></span>
@@ -125,7 +125,7 @@
                     </form>
                 </div>
 
-                <!-- Card Ticket Preview -->
+                <!-- Ticket Card Preview -->
                 <div class="glass-card p-6 flex flex-col items-center justify-center text-center border-purple-500/30 relative overflow-hidden">
                     <div class="absolute -top-12 -right-12 w-32 h-32 bg-pink-500/20 rounded-full blur-2xl"></div>
                     <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl"></div>
@@ -158,7 +158,7 @@
 
         <!-- TAB 2: ADMIN PANEL -->
         <section id="tab-admin" class="hidden space-y-6">
-            <!-- Password Auth Card -->
+            <!-- Password Auth Overlay -->
             <div id="adminAuthOverlay" class="glass-card p-8 max-w-md mx-auto text-center space-y-4">
                 <div class="w-16 h-16 rounded-full bg-purple-900/50 border border-purple-500/30 flex items-center justify-center mx-auto text-pink-400 text-2xl">
                     <i class="fa-solid fa-lock"></i>
@@ -174,7 +174,7 @@
                 </div>
             </div>
 
-            <!-- Admin Content -->
+            <!-- Admin Panel Content -->
             <div id="adminPanelContent" class="hidden space-y-6">
                 <!-- Action Bar -->
                 <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-4 border-purple-500/30">
@@ -183,12 +183,12 @@
                             <i class="fa-solid fa-qrcode text-lg"></i>
                             فتح الماسح الضوئي (الكاميرا)
                         </button>
-                        <button onclick="triggerManualSync()" title="إعادة مزامنة فورية" class="p-3 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 text-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                        <button onclick="triggerManualSync()" title="تحديث وتزامن سريعة" class="p-3 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 text-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-2">
                             <i class="fa-solid fa-rotate"></i> مزامنة سريعة
                         </button>
                     </div>
 
-                    <!-- Export & Share Buttons -->
+                    <!-- Export & Data Tools -->
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="exportToExcel('attended')" class="px-3 py-2 bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
                             <i class="fa-solid fa-file-excel text-emerald-400"></i> تصدير الحاضرات
@@ -205,7 +205,7 @@
                     </div>
                 </div>
 
-                <!-- Service Channel Setup -->
+                <!-- Service Sync Channel Setup -->
                 <div class="glass-card p-4 flex flex-wrap items-center justify-between gap-3 border-pink-500/20">
                     <div class="text-xs text-gray-300 flex items-center gap-2">
                         <i class="fa-solid fa-network-wired text-pink-400"></i>
@@ -220,7 +220,7 @@
                     </div>
                 </div>
 
-                <!-- Stats Cards -->
+                <!-- Statistics Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="glass-card p-5 border-purple-500/20">
                         <div class="text-xs text-gray-400 font-bold">إجمالي الدعوات المسجلة</div>
@@ -252,7 +252,7 @@
                     </select>
                 </div>
 
-                <!-- Table -->
+                <!-- Table View -->
                 <div class="glass-card overflow-hidden border-purple-500/20">
                     <div class="overflow-x-auto">
                         <table class="w-full text-right text-sm">
@@ -327,7 +327,7 @@
             <h3 class="text-lg font-black text-white flex items-center gap-2">
                 <i class="fa-solid fa-share-nodes text-purple-400"></i> نقل ومشاركة البيانات بين الأجهزة
             </h3>
-            <p class="text-xs text-gray-400">في حالة انقطاع الإنترنت، يمكنك تصدير الملف من التابلت واستيراده مباشرة على التليفون:</p>
+            <p class="text-xs text-gray-400">في حالة ضعف الإنترنت، يمكنك تصدير الملف من التابلت واستيراده مباشرة على التليفون:</p>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <button onclick="downloadJsonBackup()" class="p-4 bg-purple-900/40 border border-purple-500/40 hover:bg-purple-800/60 text-white rounded-xl text-xs font-bold text-center flex flex-col items-center gap-2 transition">
@@ -345,71 +345,6 @@
 
     <canvas id="qrCanvas" class="hidden"></canvas>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Canvas environment variables fallback
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sec-girls-invitations-v4';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let db = null;
-        let auth = null;
-
-        window.initFirebaseSync = async function() {
-            if (!firebaseConfig) {
-                console.log("Firebase config not present, using dynamic REST relay sync engine.");
-                return false;
-            }
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Listen to Firestore real-time updates
-                const roomKey = window.getSyncRoomKey();
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', `invitations_${roomKey}`);
-
-                onSnapshot(colRef, (snapshot) => {
-                    let remoteItems = [];
-                    snapshot.forEach(docSnap => {
-                        remoteItems.push(docSnap.data());
-                    });
-                    if (remoteItems.length > 0) {
-                        window.mergeRemoteInvitations(remoteItems);
-                        window.updateSyncUIStatus(true, 'متصل سحابياً (مباشر)');
-                    }
-                }, (error) => {
-                    console.warn("Firestore snapshot error:", error);
-                    window.updateSyncUIStatus(false, 'وضع مزامنة احتياطي');
-                });
-
-                window.firebasePushSingleItem = async function(item) {
-                    if (!auth.currentUser || !db) return;
-                    try {
-                        const roomKey = window.getSyncRoomKey();
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', `invitations_${roomKey}`, item.code);
-                        await setDoc(docRef, item, { merge: true });
-                    } catch(e) {
-                        console.error("Firestore push error:", e);
-                    }
-                };
-                return true;
-            } catch(e) {
-                console.error("Firebase init failed:", e);
-                return false;
-            }
-        };
-    </script>
-
     <script>
         const ADMIN_PASSWORD = "968351";
         const STORAGE_KEY = "church_invitations_v4";
@@ -418,18 +353,19 @@
         let invitations = [];
         let html5QrcodeScanner = null;
         let isScannerActive = false;
-        let broadcastChannel = null;
-        let isCloudConnected = false;
+        let sseEventSource = null;
 
-        window.getSyncRoomKey = function() {
-            return localStorage.getItem(ROOM_KEY_STORAGE) || "sec-girls-2026";
-        };
-
-        function setSyncRoomKey(key) {
-            localStorage.setItem(ROOM_KEY_STORAGE, key.trim());
+        function getSyncRoomKey() {
+            let key = localStorage.getItem(ROOM_KEY_STORAGE) || "sec-girls-2026";
+            return key.replace(/[^a-zA-Z0-9_-]/g, '_');
         }
 
-        // Web Audio Feedback
+        function setSyncRoomKey(key) {
+            const clean = key.trim().replace(/[^a-zA-Z0-9_-]/g, '_') || "sec-girls-2026";
+            localStorage.setItem(ROOM_KEY_STORAGE, clean);
+            return clean;
+        }
+
         function playChime(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -457,24 +393,16 @@
             } catch (e) {}
         }
 
-        window.onload = async function() {
-            document.getElementById('serviceRoomInput').value = window.getSyncRoomKey();
+        window.onload = function() {
+            document.getElementById('serviceRoomInput').value = getSyncRoomKey();
             loadInvitationsFromLocal();
-            setupCrossTabBroadcast();
-            
-            // Try initializing Firebase
-            let firebaseOk = false;
-            if (typeof window.initFirebaseSync === 'function') {
-                firebaseOk = await window.initFirebaseSync();
-            }
-
-            // Always start back-up HTTP sync relay (works across devices without backend setup)
-            startRelayCloudSync();
             renderTicketPreview(null);
+            
+            // Start real-time sync engine
+            initRealtimeSyncStream();
         };
 
         function updateSyncUIStatus(connected, text) {
-            isCloudConnected = connected;
             const badge = document.getElementById('syncStatusBadge');
             const statusText = document.getElementById('syncStatusText');
             if (!badge || !statusText) return;
@@ -482,14 +410,13 @@
             if (connected) {
                 badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
                 badge.querySelector('span').className = "w-2 h-2 rounded-full bg-emerald-400 badge-pulse";
-                statusText.textContent = text || "متصل ومزامن لحظياً";
+                statusText.textContent = text || "متصل سحابياً (مباشر)";
             } else {
                 badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
                 badge.querySelector('span').className = "w-2 h-2 rounded-full bg-amber-400 badge-pulse";
                 statusText.textContent = text || "جاري الاتصال...";
             }
         }
-        window.updateSyncUIStatus = updateSyncUIStatus;
 
         function loadInvitationsFromLocal() {
             try {
@@ -502,20 +429,13 @@
             updateStats();
         }
 
-        function saveInvitationsLocal(shouldBroadcast = true) {
+        function saveInvitationsLocal() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(invitations));
             renderTable();
             updateStats();
-
-            if (shouldBroadcast && broadcastChannel) {
-                try {
-                    broadcastChannel.postMessage({ type: 'SYNC_INVITATIONS', data: invitations });
-                } catch(e) {}
-            }
         }
 
-        // Merge remote records with local array (keeping most updated attendances)
-        window.mergeRemoteInvitations = function(remoteList) {
+        function mergeRemoteInvitations(remoteList) {
             if (!Array.isArray(remoteList)) return;
             const map = new Map(invitations.map(i => [i.code.trim().toUpperCase(), i]));
             let updated = false;
@@ -529,7 +449,6 @@
                     map.set(codeKey, item);
                     updated = true;
                 } else {
-                    // If remote attendance status changed to true
                     if (!existing.attended && item.attended) {
                         existing.attended = true;
                         existing.attendedAt = item.attendedAt || new Date().toISOString();
@@ -540,75 +459,129 @@
 
             if (updated) {
                 invitations = Array.from(map.values());
-                saveInvitationsLocal(false);
-            }
-        };
-
-        // Cross-tab broadcast for devices sharing same page context
-        function setupCrossTabBroadcast() {
-            if ('BroadcastChannel' in window) {
-                broadcastChannel = new BroadcastChannel('church_sec_girls_channel');
-                broadcastChannel.onmessage = (event) => {
-                    if (event.data && event.data.type === 'SYNC_INVITATIONS') {
-                        window.mergeRemoteInvitations(event.data.data);
-                    }
-                };
+                saveInvitationsLocal();
             }
         }
 
-        // Public Cloud Relay Sync Engine (ensures Tablet and Phone communicate even on GitHub Pages)
-        function getRelayUrl() {
-            const roomKey = window.getSyncRoomKey();
-            return `https://api.jsonbin.io/v3/b/church_${roomKey.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        function getChannelTopic() {
+            return `church_sec_girls_${getSyncRoomKey()}`;
         }
 
-        async function startRelayCloudSync() {
-            await pushAndFetchRelay();
-            setInterval(async () => {
-                await pushAndFetchRelay();
-            }, 3000); // 3 seconds poll for instant scanner sync
-        }
+        async function initRealtimeSyncStream() {
+            const topic = getChannelTopic();
+            updateSyncUIStatus(false, 'جاري جلب السجل السحابي...');
 
-        async function pushAndFetchRelay() {
+            // Step 1: Fetch history from remote pub-sub stream to restore items created on other devices
             try {
-                const roomKey = window.getSyncRoomKey();
-                const endpoint = `https://kvstorage.net/api/v1/storage/church_${roomKey}`;
+                const historyRes = await fetch(`https://ntfy.sh/${topic}/json?poll=1`);
+                if (historyRes.ok) {
+                    const textData = await historyRes.text();
+                    const lines = textData.trim().split('\n');
+                    
+                    lines.forEach(line => {
+                        if (!line) return;
+                        try {
+                            const parsed = JSON.parse(line);
+                            if (parsed.message) {
+                                const payload = JSON.parse(parsed.message);
+                                handleNetworkPayload(payload, false);
+                            }
+                        } catch(e) {}
+                    });
+                }
+            } catch(e) {
+                console.warn("History fetch notice:", e);
+            }
+
+            // Step 2: Establish real-time Server-Sent Events (SSE) live connection
+            if (sseEventSource) {
+                sseEventSource.close();
+            }
+
+            try {
+                sseEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
                 
-                // 1. Fetch cloud state
-                const res = await fetch(endpoint, { cache: 'no-cache' });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        window.mergeRemoteInvitations(data);
-                        updateSyncUIStatus(true, 'متصل ومزامن لحظياً');
+                sseEventSource.onopen = function() {
+                    updateSyncUIStatus(true, 'متصل سحابياً (مباشر)');
+                };
+
+                sseEventSource.onmessage = function(event) {
+                    try {
+                        const parsed = JSON.parse(event.data);
+                        if (parsed.message) {
+                            const payload = JSON.parse(parsed.message);
+                            handleNetworkPayload(payload, true);
+                        }
+                    } catch(e) {}
+                };
+
+                sseEventSource.onerror = function() {
+                    updateSyncUIStatus(false, 'إعادة المحاولة...');
+                };
+            } catch(e) {
+                updateSyncUIStatus(false, 'وضع احتياطي');
+            }
+        }
+
+        function handleNetworkPayload(payload, isLive = true) {
+            if (!payload || !payload.type) return;
+
+            if (payload.type === 'NEW_INVITATION') {
+                if (payload.item) {
+                    mergeRemoteInvitations([payload.item]);
+                    if (isLive) {
+                        showToast(`🎉 دعوة جديدة: ${payload.item.name} (${payload.item.grade})`, 'info');
+                        playChime('success');
                     }
                 }
+            } else if (payload.type === 'ATTENDANCE_UPDATE') {
+                const target = invitations.find(i => i.code.trim().toUpperCase() === payload.code.trim().toUpperCase());
+                if (target && !target.attended) {
+                    target.attended = true;
+                    target.attendedAt = payload.attendedAt || new Date().toISOString();
+                    saveInvitationsLocal();
+                    if (isLive) {
+                        showToast(`✅ تم تسحيل دخول: ${target.name}`, 'success');
+                    }
+                }
+            } else if (payload.type === 'CLEAR_ALL') {
+                invitations = [];
+                saveInvitationsLocal();
+            } else if (payload.type === 'BULK_SYNC') {
+                if (Array.isArray(payload.data)) {
+                    mergeRemoteInvitations(payload.data);
+                }
+            }
+        }
 
-                // 2. Push local state to cloud storage endpoint
-                await fetch(endpoint, {
+        async function broadcastNetworkEvent(payload) {
+            const topic = getChannelTopic();
+            try {
+                await fetch(`https://ntfy.sh/${topic}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(invitations)
+                    body: JSON.stringify(payload)
                 });
             } catch(e) {
-                // If offline or endpoint blocked, update status smoothly
-                updateSyncUIStatus(false, 'في انتظار الاتصال بالشبكة');
+                console.error("Broadcast network error:", e);
             }
         }
 
         function triggerManualSync() {
-            showToast('جاري تحديث المزامنة مع كافة الأجهزة...', 'info');
-            pushAndFetchRelay().then(() => {
+            showToast('جاري تحديث وتزامن البيانات مع السحابة...', 'info');
+            initRealtimeSyncStream().then(() => {
+                // Broadcast bulk list to ensure parity
+                broadcastNetworkEvent({ type: 'BULK_SYNC', data: invitations });
                 showToast('تمت المزامنة بنجاح!', 'success');
             });
         }
 
         function updateSyncRoom() {
-            const newKey = document.getElementById('serviceRoomInput').value.trim();
-            if (!newKey) return;
-            setSyncRoomKey(newKey);
-            showToast(`تم ربط التطبيق بالقناة: (${newKey})`, 'success');
-            triggerManualSync();
+            const inputVal = document.getElementById('serviceRoomInput').value;
+            const cleanKey = setSyncRoomKey(inputVal);
+            document.getElementById('serviceRoomInput').value = cleanKey;
+            showToast(`تم ربط التطبيق بالقناة: (${cleanKey})`, 'success');
+            initRealtimeSyncStream();
         }
 
         function switchTab(tabName) {
@@ -667,14 +640,11 @@
             invitations.unshift(newInvitation);
             saveInvitationsLocal();
 
-            // Push to Firebase Firestore if initialized
-            if (typeof window.firebasePushSingleItem === 'function') {
-                window.firebasePushSingleItem(newInvitation);
-            }
-            pushAndFetchRelay();
+            // Instant cloud broadcast
+            broadcastNetworkEvent({ type: 'NEW_INVITATION', item: newInvitation });
 
             renderTicketPreview(newInvitation);
-            showToast('تم إنشاء الدعوة ومزامنتها بنجاح!', 'success');
+            showToast('تم إنشاء الدعوة ومزامنتها سحابياً بنجاح!', 'success');
             document.getElementById('invitationForm').reset();
         }
 
@@ -753,10 +723,8 @@
 
         function processScannedCode(scannedCode) {
             if (!scannedCode) return;
-            // Clean up code formatting
             const cleanCode = scannedCode.trim().toUpperCase();
 
-            // Check match flexibly
             const targetIndex = invitations.findIndex(item => item.code.trim().toUpperCase() === cleanCode);
             const alertBox = document.getElementById('scannerAlert');
             alertBox.classList.remove('hidden', 'bg-emerald-950', 'text-emerald-300', 'bg-red-950', 'text-red-300', 'border-emerald-500/50', 'border-red-500/50');
@@ -764,7 +732,7 @@
             if (targetIndex === -1) {
                 playChime('warning');
                 alertBox.className = "p-3 rounded-xl text-xs font-bold text-center bg-red-950 text-red-300 border border-red-500/50";
-                alertBox.innerHTML = `⚠️ كود غير معروف: (${cleanCode}). لم يتم العثور على هذه الدعوة!<br><span class="text-[11px] font-normal text-gray-300">تأكد من ضغط زر "مزامنة سريعة" إذا كانت الدعوة مضافة حديثاً من تابلت آخر.</span>`;
+                alertBox.innerHTML = `⚠️ كود غير معروف: (${cleanCode}). لم يتم العثور على هذه الدعوة!<br><span class="text-[11px] font-normal text-gray-300">تأكد من اضغط زر "مزامنة سريعة" لجلب كافة الدعوات الجديدة.</span>`;
                 return;
             }
 
@@ -777,14 +745,14 @@
                 alertBox.innerHTML = `🚨 إنذار: تم استخدام هذه الدعوة مسبقاً!<br><span class="text-[11px] font-normal">المدعوة: (${item.name}) - تم الدخول الساعة ${timeFormatted}</span>`;
             } else {
                 playChime('success');
+                const nowISO = new Date().toISOString();
                 invitations[targetIndex].attended = true;
-                invitations[targetIndex].attendedAt = new Date().toISOString();
+                invitations[targetIndex].attendedAt = nowISO;
 
                 saveInvitationsLocal();
-                if (typeof window.firebasePushSingleItem === 'function') {
-                    window.firebasePushSingleItem(invitations[targetIndex]);
-                }
-                pushAndFetchRelay();
+
+                // Broadcast attendance event to all logged-in devices instantly
+                broadcastNetworkEvent({ type: 'ATTENDANCE_UPDATE', code: cleanCode, attendedAt: nowISO });
 
                 alertBox.className = "p-3 rounded-xl text-xs font-bold text-center bg-emerald-950 text-emerald-300 border border-emerald-500/50";
                 alertBox.innerHTML = `✅ تم الدخول بنجاح!<br><span class="text-sm font-black">${item.name}</span> (${item.grade})`;
@@ -881,7 +849,6 @@
             if (confirm("هل أنت متأكد من حذف هذه الدعوة بشكل نهائي؟")) {
                 invitations = invitations.filter(item => item.code !== code);
                 saveInvitationsLocal();
-                pushAndFetchRelay();
                 showToast('تم حذف الدعوة بنجاح', 'success');
             }
         }
@@ -890,7 +857,7 @@
             if (confirm("هل أنتِ متأكدة من مسح جميع الدعوات المسجلة بالكامل؟ لا يمكن التراجع عن هذا الإجراء.")) {
                 invitations = [];
                 saveInvitationsLocal();
-                pushAndFetchRelay();
+                broadcastNetworkEvent({ type: 'CLEAR_ALL' });
                 showToast('تم مسح جميع الدعوات بنجاح', 'success');
             }
         }
@@ -947,7 +914,6 @@
             }, 500);
         }
 
-        // Backup & JSON File Transfer Helpers
         function openBackupModal() {
             document.getElementById('backupModal').classList.remove('hidden');
         }
@@ -959,7 +925,7 @@
             const blob = new Blob([JSON.stringify(invitations, null, 2)], { type: "application/json" });
             const a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
-            a.download = `invitations_backup_${window.getSyncRoomKey()}.json`;
+            a.download = `invitations_backup_${getSyncRoomKey()}.json`;
             a.click();
             showToast('تم تحميل ملف النسخة الاحتياطية بنجاح', 'success');
         }
@@ -973,8 +939,8 @@
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (Array.isArray(imported)) {
-                        window.mergeRemoteInvitations(imported);
-                        pushAndFetchRelay();
+                        mergeRemoteInvitations(imported);
+                        broadcastNetworkEvent({ type: 'BULK_SYNC', data: invitations });
                         showToast(`تم استيراد ${imported.length} دعوة بنجاح!`, 'success');
                         closeBackupModal();
                     } else {
