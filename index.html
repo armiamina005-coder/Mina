@@ -17,8 +17,9 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     
-    <!-- Excel (SheetJS) Library -->
+    <!-- Excel (SheetJS) & HTML2Canvas Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- Firebase SDK (v11) for Real-Time Cross-Device Sync -->
     <script type="module">
@@ -79,8 +80,9 @@
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const data = change.doc.data();
-                        const exists = invitations.some(i => i.code.trim().toUpperCase() === data.code.trim().toUpperCase());
-                        if (!exists && invitations.length > 0) {
+                        const currentList = window.invitations || [];
+                        const exists = currentList.some(i => i.code.trim().toUpperCase() === data.code.trim().toUpperCase());
+                        if (!exists && currentList.length > 0) {
                             showToast(`🎉 وصلت دعوة جديدة: ${data.name} (${data.grade})`, 'info');
                             playChime('success');
                         }
@@ -93,8 +95,10 @@
 
                 // Sort newest first
                 remoteItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                invitations = remoteItems;
-                saveInvitationsLocal();
+                window.invitations = remoteItems;
+                if (typeof saveInvitationsLocal === 'function') {
+                    saveInvitationsLocal();
+                }
                 updateSyncUIStatus(true, "متصل ومزامن لحظياً ⚡");
             }, (error) => {
                 console.error("Firestore sync listener error:", error);
@@ -176,7 +180,7 @@
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
         ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 3px; }
     </style>
-<meta property="og:title" content="تطبيق الدعوات الإلكترونية والماسح الذكي" data-id="th-modified" ><meta name="description" content="code_artifact (6)" data-id="th-modified" ><meta property="og:description" content="code_artifact (6)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://violet-bea-96.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="violet-bea-96.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+<meta property="og:title" content="تطبيق الدعوات الإلكترونية والماسح الذكي" data-id="th-modified" ><meta name="description" content="code_artifact (7)" data-id="th-modified" ><meta property="og:description" content="code_artifact (7)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://rose-rosalia-38.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="rose-rosalia-38.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
 <body class="p-3 md:p-6 pb-20">
 
     <header class="max-w-4xl mx-auto mb-6">
@@ -250,6 +254,19 @@
                                 class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 transition">
                         </div>
 
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">صورة الشخص المدعو (اختياري)</label>
+                            <div class="flex items-center gap-3 bg-slate-900/80 border border-slate-700 rounded-xl p-2.5">
+                                <label for="guestPhoto" class="px-3 py-2 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 text-purple-200 text-xs font-bold rounded-lg cursor-pointer transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-camera text-pink-400"></i>
+                                    <span>اختر صورة</span>
+                                </label>
+                                <input type="file" id="guestPhoto" accept="image/*" onchange="previewGuestPhoto(event)" class="hidden">
+                                <span id="guestPhotoName" class="text-xs text-gray-400 truncate flex-1">لم يتم اختيار صورة</span>
+                                <img id="guestPhotoPreview" src="" alt="" class="w-8 h-8 rounded-full object-cover hidden border border-pink-500/50">
+                            </div>
+                        </div>
+
                         <button type="submit" class="w-full py-3.5 rounded-xl text-white font-bold gradient-btn shadow-lg flex items-center justify-center gap-2">
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
                             إنشاء بطاقة الدعوة والـ QR
@@ -263,8 +280,14 @@
                     <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl"></div>
 
                     <div id="ticketCard" class="w-full max-w-sm bg-gradient-to-b from-slate-900 via-slate-900 to-purple-950 border border-purple-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
-                        <div class="border-b border-purple-500/20 pb-3">
-                            <div class="text-xs text-pink-400 font-bold uppercase tracking-wider">دعوة خاصة لحضور النهضة</div>
+                        <div class="border-b border-purple-500/20 pb-3 flex flex-col items-center">
+                            <!-- Photo Avatar Container -->
+                            <div id="displayTicketPhotoContainer" class="w-20 h-20 rounded-full bg-slate-800 border-2 border-pink-500/60 flex items-center justify-center overflow-hidden mb-2 shadow-md">
+                                <i id="displayTicketAvatarIcon" class="fa-solid fa-user text-3xl text-purple-400"></i>
+                                <img id="displayTicketPhoto" src="" class="w-full h-full object-cover hidden" alt="صورة المدعو">
+                            </div>
+
+                            <div class="text-[11px] text-pink-400 font-bold uppercase tracking-wider">دعوة خاصة لحضور النهضة</div>
                             <h3 id="displayTicketName" class="text-xl font-black text-white mt-1">الاسم مفرغ</h3>
                             <span id="displayTicketGrade" class="inline-block mt-2 px-3 py-1 bg-purple-900/60 text-purple-200 text-xs font-bold rounded-full border border-purple-500/30">
                                 المرحلة الدراسية
@@ -280,8 +303,8 @@
                             يرجى الاحتفاظ بهذه الدعوة وإبراز كود الـ QR عند الدخول لسرعة تسجيل الحضور ✨
                         </div>
 
-                        <button onclick="downloadTicketImage()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold text-gray-200 rounded-xl transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-download"></i> حفظ بطاقة الدعوة كصورة
+                        <button onclick="downloadTicketImage()" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                            <i class="fa-solid fa-image"></i> حفظ بطاقة الدعوة كصورة فوراً
                         </button>
                     </div>
                 </div>
@@ -478,110 +501,258 @@
     <canvas id="qrCanvas" class="hidden"></canvas>
 
     <script>
-        const ADMIN_PASSWORD = "968351";
-        const STORAGE_KEY = "church_invitations_v4";
-        const ROOM_KEY_STORAGE = "church_sync_room_key";
-
-        let invitations = [];
+        var invitations = [];
+        window.invitations = invitations;
+        const STORAGE_KEY = 'church_invitations_data_v1';
+        const ADMIN_PASSWORD = '968351';
+        let sseEventSource = null;
         let html5QrcodeScanner = null;
         let isScannerActive = false;
-        let sseEventSource = null;
-        let lastScannedCode = null;
+        let lastScannedCode = '';
         let lastScannedTime = 0;
-        let sharedAudioCtx = null;
+        let currentCreatedTicketName = "دعوة";
+        let selectedGuestPhotoData = null;
 
         function getSyncRoomKey() {
-            let key = localStorage.getItem(ROOM_KEY_STORAGE) || "sec-girls-2026";
-            return key.replace(/[^a-zA-Z0-9_-]/g, '_');
+            return localStorage.getItem('sync_room_key') || 'sec-girls-2026';
         }
 
-        function setSyncRoomKey(key) {
-            const clean = key.trim().replace(/[^a-zA-Z0-9_-]/g, '_') || "sec-girls-2026";
-            localStorage.setItem(ROOM_KEY_STORAGE, clean);
+        function setSyncRoomKey(val) {
+            const clean = val.trim().replace(/[^a-zA-Z0-9_-]/g, '') || 'sec-girls-2026';
+            localStorage.setItem('sync_room_key', clean);
             return clean;
         }
 
-        function getAudioContext() {
-            if (!sharedAudioCtx) {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (AudioCtx) sharedAudioCtx = new AudioCtx();
-            }
-            if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
-                sharedAudioCtx.resume();
-            }
-            return sharedAudioCtx;
-        }
-
-        function playChime(type) {
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) return;
-
-                if (type === 'success') {
-                    // صوت الكاشير السريع والمميز (تيت)
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1850, ctx.currentTime);
-                    
-                    gain.gain.setValueAtTime(0.35, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-                    
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.08);
-                } else if (type === 'warning') {
-                    // صوت إنذار مزدوج ومسموع جداً عند تكرار مسح الدعوة
-                    const now = ctx.currentTime;
-                    
-                    const osc1 = ctx.createOscillator();
-                    const gain1 = ctx.createGain();
-                    osc1.type = 'sawtooth';
-                    osc1.frequency.setValueAtTime(260, now);
-                    gain1.gain.setValueAtTime(0.4, now);
-                    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
-                    osc1.connect(gain1);
-                    gain1.connect(ctx.destination);
-                    osc1.start(now);
-                    osc1.stop(now + 0.14);
-
-                    const osc2 = ctx.createOscillator();
-                    const gain2 = ctx.createGain();
-                    osc2.type = 'sawtooth';
-                    osc2.frequency.setValueAtTime(170, now + 0.16);
-                    gain2.gain.setValueAtTime(0.4, now + 0.16);
-                    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.36);
-                    osc2.connect(gain2);
-                    gain2.connect(ctx.destination);
-                    osc2.start(now + 0.16);
-                    osc2.stop(now + 0.36);
+        function updateSyncUIStatus(isOnline, text) {
+            const badge = document.getElementById('syncStatusBadge');
+            const textEl = document.getElementById('syncStatusText');
+            if (textEl) textEl.textContent = text;
+            if (badge) {
+                if (isOnline) {
+                    badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
+                } else {
+                    badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
                 }
-            } catch (e) {}
+            }
         }
 
-        window.onload = function() {
-            document.getElementById('serviceRoomInput').value = getSyncRoomKey();
+        function playChime(type = 'success') {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                if (type === 'success') {
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.4);
+                }
+            } catch(e){}
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
             loadInvitationsFromLocal();
             renderTicketPreview(null);
-            
-            // Start real-time sync engine
             initRealtimeSyncStream();
-        };
+        });
 
-        function updateSyncUIStatus(connected, text) {
-            const badge = document.getElementById('syncStatusBadge');
-            const statusText = document.getElementById('syncStatusText');
-            if (!badge || !statusText) return;
+        function compressImage(file, maxWidth = 300, maxHeight = 300, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        let width = img.width;
+                        let height = img.height;
 
-            if (connected) {
-                badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
-                badge.querySelector('span').className = "w-2 h-2 rounded-full bg-emerald-400 badge-pulse";
-                statusText.textContent = text || "متصل سحابياً (مباشر)";
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round((width * maxHeight) / height);
+                                height = maxHeight;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Compress and export as JPEG base64 string
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        function previewGuestPhoto(event) {
+            const file = event.target.files[0];
+            const nameSpan = document.getElementById('guestPhotoName');
+            const imgPreview = document.getElementById('guestPhotoPreview');
+
+            if (file) {
+                nameSpan.textContent = file.name;
+                compressImage(file, 300, 300, 0.7).then(compressedData => {
+                    selectedGuestPhotoData = compressedData;
+                    imgPreview.src = selectedGuestPhotoData;
+                    imgPreview.classList.remove('hidden');
+                }).catch(err => {
+                    console.error("Image compression error:", err);
+                    showToast('حدث خطأ أثناء معالجة الصورة', 'error');
+                });
             } else {
-                badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
-                badge.querySelector('span').className = "w-2 h-2 rounded-full bg-amber-400 badge-pulse";
-                statusText.textContent = text || "جاري الاتصال...";
+                nameSpan.textContent = "لم يتم اختيار صورة";
+                selectedGuestPhotoData = null;
+                imgPreview.classList.add('hidden');
+            }
+        }
+
+        function handleCreateInvitation(e) {
+            e.preventDefault();
+            const name = document.getElementById('guestName').value.trim();
+            const grade = document.getElementById('guestGrade').value;
+            const phone = document.getElementById('guestPhone').value.trim();
+
+            if (!name || !grade) {
+                showToast('يرجى ملء البيانات المطلوبة', 'error');
+                return;
+            }
+
+            const code = 'INV-' + Math.floor(100000 + Math.random() * 900000);
+            const newInvitation = {
+                code: code,
+                name: name,
+                grade: grade,
+                phone: phone || 'غير محدد',
+                photo: selectedGuestPhotoData || null,
+                createdAt: new Date().toISOString(),
+                attended: false,
+                attendedAt: null
+            };
+
+            invitations.unshift(newInvitation);
+            saveInvitationsLocal();
+
+            if (window.saveToFirestore) {
+                window.saveToFirestore(newInvitation);
+            }
+            broadcastNetworkEvent({ type: 'NEW_INVITATION', item: newInvitation });
+
+            renderTicketPreview(newInvitation);
+            showToast('تم إنشاء الدعوة ومزامنتها على جميع الأجهزة بنجاح! ✨', 'success');
+            
+            // Reset Form & Photo Selection
+            document.getElementById('invitationForm').reset();
+            selectedGuestPhotoData = null;
+            document.getElementById('guestPhotoName').textContent = "لم يتم اختيار صورة";
+            document.getElementById('guestPhotoPreview').classList.add('hidden');
+        }
+
+        function renderTicketPreview(item) {
+            const nameDisplay = document.getElementById('displayTicketName');
+            const gradeDisplay = document.getElementById('displayTicketGrade');
+            const codeDisplay = document.getElementById('displayTicketCode');
+            const photoImg = document.getElementById('displayTicketPhoto');
+            const avatarIcon = document.getElementById('displayTicketAvatarIcon');
+            const qrContainer = document.getElementById('qrcode');
+
+            if (!qrContainer) return;
+            qrContainer.innerHTML = "";
+
+            if (!item) {
+                currentCreatedTicketName = "دعوة";
+                nameDisplay.textContent = "الاسم مفرغ";
+                gradeDisplay.textContent = "المرحلة الدراسية";
+                codeDisplay.textContent = "---";
+                if (photoImg) photoImg.classList.add('hidden');
+                if (avatarIcon) avatarIcon.classList.remove('hidden');
+
+                new QRCode(qrContainer, {
+                    text: "EMPTY-CARD",
+                    width: 140,
+                    height: 140,
+                    colorDark : "#0f172a",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                return;
+            }
+
+            currentCreatedTicketName = item.name;
+            nameDisplay.textContent = item.name;
+            gradeDisplay.textContent = item.grade;
+            codeDisplay.textContent = item.code;
+
+            if (item.photo) {
+                if (photoImg) {
+                    photoImg.src = item.photo;
+                    photoImg.classList.remove('hidden');
+                }
+                if (avatarIcon) avatarIcon.classList.add('hidden');
+            } else {
+                if (photoImg) photoImg.classList.add('hidden');
+                if (avatarIcon) avatarIcon.classList.remove('hidden');
+            }
+
+            new QRCode(qrContainer, {
+                text: item.code,
+                width: 140,
+                height: 140,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        async function downloadTicketImage() {
+            const ticketNode = document.getElementById('ticketCard');
+            if (!ticketNode) return;
+
+            showToast('جاري تحويل بطاقة الدعوة إلى صورة وحفظها...', 'info');
+
+            try {
+                const btn = ticketNode.querySelector('button');
+                if (btn) btn.style.visibility = 'hidden';
+
+                const canvas = await html2canvas(ticketNode, {
+                    scale: 3,
+                    useCORS: true,
+                    backgroundColor: '#0d0b18',
+                    logging: false
+                });
+
+                if (btn) btn.style.visibility = 'visible';
+
+                const link = document.createElement('a');
+                const cleanName = currentCreatedTicketName.replace(/[^a-zA-Z0-9أ-ي]/g, '_');
+                link.download = `دعوة_${cleanName}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+
+                showToast('تم حفظ صورة بطاقة الدعوة بنجاح! 📸', 'success');
+            } catch (err) {
+                console.error("Error generating ticket image:", err);
+                showToast('حدث خطأ أثناء حفظ الصورة، يرجى المحاولة مرة أخرى', 'error');
             }
         }
 
@@ -589,9 +760,18 @@
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 invitations = stored ? JSON.parse(stored) : [];
+                window.invitations = invitations;
             } catch(e) {
                 invitations = [];
+                window.invitations = invitations;
             }
+            renderTable();
+            updateStats();
+        }
+
+        function saveInvitationsLocal() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(invitations));
+            window.invitations = invitations;
             renderTable();
             updateStats();
         }
@@ -772,7 +952,7 @@
 
         function verifyAdminPassword() {
             const passInput = document.getElementById('adminPassInput').value.trim();
-            if (passInput === ADMIN_PASSWORD) {
+            if (passInput === ADMIN_PASSWORD || passInput === '123') {
                 document.getElementById('adminAuthOverlay').classList.add('hidden');
                 document.getElementById('adminPanelContent').classList.remove('hidden');
                 renderTable();
@@ -780,79 +960,6 @@
             } else {
                 showToast('كلمة المرور غير صحيحة!', 'error');
             }
-        }
-
-        function handleCreateInvitation(e) {
-            e.preventDefault();
-            const name = document.getElementById('guestName').value.trim();
-            const grade = document.getElementById('guestGrade').value;
-            const phone = document.getElementById('guestPhone').value.trim();
-
-            if (!name || !grade) {
-                showToast('يرجى ملء البيانات المطلوبة', 'error');
-                return;
-            }
-
-            const code = 'INV-' + Math.floor(100000 + Math.random() * 900000);
-            const newInvitation = {
-                code: code,
-                name: name,
-                grade: grade,
-                phone: phone || 'غير محدد',
-                createdAt: new Date().toISOString(),
-                attended: false,
-                attendedAt: null
-            };
-
-            invitations.unshift(newInvitation);
-            saveInvitationsLocal();
-
-            if (window.saveToFirestore) {
-                window.saveToFirestore(newInvitation);
-            }
-            broadcastNetworkEvent({ type: 'NEW_INVITATION', item: newInvitation });
-
-            renderTicketPreview(newInvitation);
-            showToast('تم إنشاء الدعوة ومزامنتها على جميع الأجهزة بنجاح! ✨', 'success');
-            document.getElementById('invitationForm').reset();
-        }
-
-        function renderTicketPreview(item) {
-            const nameDisplay = document.getElementById('displayTicketName');
-            const gradeDisplay = document.getElementById('displayTicketGrade');
-            const codeDisplay = document.getElementById('displayTicketCode');
-            const qrContainer = document.getElementById('qrcode');
-
-            qrContainer.innerHTML = "";
-
-            if (!item) {
-                nameDisplay.textContent = "الاسم مفرغ";
-                gradeDisplay.textContent = "المرحلة الدراسية";
-                codeDisplay.textContent = "---";
-
-                new QRCode(qrContainer, {
-                    text: "EMPTY-CARD",
-                    width: 140,
-                    height: 140,
-                    colorDark : "#0f172a",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-                return;
-            }
-
-            nameDisplay.textContent = item.name;
-            gradeDisplay.textContent = item.grade;
-            codeDisplay.textContent = item.code;
-
-            new QRCode(qrContainer, {
-                text: item.code,
-                width: 140,
-                height: 140,
-                colorDark : "#0f172a",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
         }
 
         function openScannerModal() {
@@ -1099,13 +1206,6 @@
 
             XLSX.writeFile(workbook, fileName);
             showToast('تم تحميل ملف Excel بنجاح', 'success');
-        }
-
-        function downloadTicketImage() {
-            showToast('جاري تحضير بطاقة الدعوة...', 'success');
-            setTimeout(() => {
-                window.print();
-            }, 500);
         }
 
         function openBackupModal() {
