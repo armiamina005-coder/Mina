@@ -28,6 +28,96 @@
     <!-- SheetJS for Exporting Excel Files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <!-- Firebase SDK Modules for Cloud Synchronization -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.saveInvitationsLocal = function() {
+            localStorage.setItem('girl_service_invitations', JSON.stringify(window.invitations || []));
+        };
+
+        // Global references for scripts
+        window.firebaseStore = {
+            db: null,
+            appId: typeof __app_id !== 'undefined' ? __app_id : 'girl-service-invitations',
+            isCloudEnabled: false,
+            setDoc, updateDoc, deleteDoc, doc, collection
+        };
+
+        let initialLoadDone = false;
+
+        async function initCloud() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    const auth = getAuth(app);
+                    const db = getFirestore(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    window.firebaseStore.db = db;
+                    window.firebaseStore.isCloudEnabled = true;
+
+                    // Real-time synchronization across multiple devices simultaneously
+                    const appId = window.firebaseStore.appId;
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'invitations');
+
+                    onSnapshot(colRef, (snapshot) => {
+                        const previousData = window.invitations || [];
+                        const cloudData = [];
+                        
+                        snapshot.forEach((docSnap) => {
+                            cloudData.push({ ...docSnap.data(), id: docSnap.id });
+                        });
+
+                        // Check for newly attended guests from other devices in real-time
+                        if (initialLoadDone) {
+                            cloudData.forEach(newInv => {
+                                const oldInv = previousData.find(p => p.id === newInv.id);
+                                if (oldInv && !oldInv.attended && newInv.attended) {
+                                    // Live alert on other organizers' screens when a servant scans a code
+                                    if (typeof window.showToast === 'function') {
+                                        window.showToast(`✨ تم تسجيل حضور: ${newInv.name} (مباشر من خادمة أخرى)`, 'success');
+                                    }
+                                }
+                            });
+                        }
+                        initialLoadDone = true;
+
+                        window.invitations = cloudData;
+                        if (typeof window.saveInvitationsLocal === 'function') {
+                            window.saveInvitationsLocal();
+                        }
+                        if (typeof window.renderAttendeesTable === 'function') window.renderAttendeesTable();
+                        if (typeof window.updateStats === 'function') window.updateStats();
+                        
+                        const cloudStatus = document.getElementById('cloud-status');
+                        if (cloudStatus) {
+                            cloudStatus.innerHTML = `<i class="fa-solid fa-bolt text-emerald-400 animate-pulse"></i> المزامنة الفورية نشطة (متصل بجهاز أكثر من خادمة في نفس الوقت)`;
+                        }
+                    }, (err) => {
+                        console.error("Firestore sync error:", err);
+                        const cloudStatus = document.getElementById('cloud-status');
+                        if (cloudStatus) {
+                            cloudStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i> وضع التخزين المحلي (غير متصل بالسحاب)`;
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn("Cloud storage fallback to local storage.", e);
+            }
+        }
+
+        initCloud();
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -116,7 +206,7 @@
             border-radius: 3px;
         }
     </style>
-<meta property="og:title" content="منصة الدعوات الإلكترونية والماسح الذكي - خدمة ثانوي بنات" data-id="th-modified" ><meta name="description" content="code_artifact (3)" data-id="th-modified" ><meta property="og:description" content="code_artifact (3)" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://aquamarine-dara-89.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="aquamarine-dara-89.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+<meta property="og:title" content="منصة الدعوات الإلكترونية والماسح الذكي - خدمة ثانوي بنات" data-id="th-modified" ><meta name="description" content="code_artifact" data-id="th-modified" ><meta property="og:description" content="code_artifact" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:image:width" content="1501" data-id="th-modified" ><meta property="og:image:height" content="1501" data-id="th-modified" ><meta property="og:image:type" content="image/png" data-id="th-modified" ><meta property="og:url" content="https://pink-aeriela-81.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="pink-aeriela-81.tiiny.site" src="https://analytics.tiiny.net/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-pink-500 selection:text-white">
 
     <!-- Header Navigation -->
@@ -305,7 +395,10 @@
                         <i class="fa-solid fa-user-shield text-amber-400"></i>
                         لوحة تحكم الخادمات والمنظمين
                     </h2>
-                    <p class="text-xs text-slate-400 mt-1">متابعة تسجيل الحضور، المسح الضوئي، وإدارة قائمة المدعوات</p>
+                    <p class="text-xs text-slate-400 mt-1">متابعة تسجيل الحضور اللحظي، المسح الضوئي متعدد الأجهزة، وإدارة المدعوات</p>
+                    <p id="cloud-status" class="text-[11px] font-bold text-amber-300 mt-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> جاري ربط المزامنة السحابية الفورية...
+                    </p>
                 </div>
                 
                 <div class="flex items-center gap-2">
@@ -502,9 +595,9 @@
     </div>
 
     <script>
-        // Configuration
-        const ORGANIZER_PASSWORD = "968351"; // updated password
+        const ORGANIZER_PASSWORD = "968351";
         let invitations = JSON.parse(localStorage.getItem('girl_service_invitations') || '[]');
+        window.invitations = invitations; // expose globally for cloud sync
         let selectedPhotoData = null;
         let qrScanner = null;
         let pendingDeleteId = null; // for individual delete
@@ -512,46 +605,55 @@
         let lastScannedCode = null;
         let lastScanTime = 0;
 
-        // Audio Context Synthesizer for scan feedback sounds
+        function saveInvitations() {
+            if (typeof window.saveInvitationsLocal === 'function') {
+                window.saveInvitationsLocal();
+            }
+        }
+
         function playScanSound(type) {
             try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
                 gain.connect(ctx.destination);
 
+                const now = ctx.currentTime;
                 if (type === 'success') {
-                    // Double chime tone for successful check-in
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
-                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.3);
-                } else if (type === 'warning' || type === 'error') {
-                    // Alarm buzz tone for duplicate scan / invalid code
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.setValueAtTime(880, now + 0.1);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'warning') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
-                    osc.frequency.setValueAtTime(140, ctx.currentTime + 0.18);
-                    gain.gain.setValueAtTime(0.4, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.4);
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.setValueAtTime(200, now + 0.15);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'error') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(180, now);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
                 }
-            } catch (e) {
-                console.log('Audio playback unsupported or blocked', e);
+            } catch(e) {
+                console.warn("Audio error:", e);
             }
         }
 
-        // On Load Initialization
         window.onload = function() {
-            // Display latest guest preview if exists, otherwise display default placeholder
-            if (invitations.length > 0) {
-                renderTicketPreview(invitations[invitations.length - 1]);
+            if (window.invitations && window.invitations.length > 0) {
+                renderTicketPreview(window.invitations[window.invitations.length - 1]);
             } else {
                 renderDefaultTicketPreview();
             }
@@ -589,7 +691,7 @@
             } else {
                 organizerView.classList.add('hidden');
                 guestView.classList.remove('hidden');
-                navGuestBtn.classList.add('hidden');
+                navGuestBtn.add('hidden');
                 closeScannerModal();
             }
         }
@@ -608,7 +710,7 @@
             }
         }
 
-        function handleGenerateInvitation(event) {
+        async function handleGenerateInvitation(event) {
             event.preventDefault();
             
             const name = document.getElementById('guest-name').value.trim();
@@ -630,8 +732,20 @@
                 attendedTime: null
             };
 
-            invitations.push(newInvitation);
-            saveInvitations();
+            if (window.firebaseStore && window.firebaseStore.isCloudEnabled) {
+                try {
+                    const { db, appId, setDoc, doc } = window.firebaseStore;
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'invitations', id);
+                    await setDoc(docRef, newInvitation);
+                } catch(e) {
+                    console.error("Cloud save failed, falling back to local:", e);
+                    window.invitations.push(newInvitation);
+                    saveInvitations();
+                }
+            } else {
+                window.invitations.push(newInvitation);
+                saveInvitations();
+            }
 
             // Reset Form
             document.getElementById('invitation-form').reset();
@@ -641,7 +755,7 @@
 
             // Render Ticket
             renderTicketPreview(newInvitation);
-            showToast('تم إنشاء بطاقة الدعوة بنجاح!', 'success');
+            showToast('تم إنشاء بطاقة الدعوة بنجاح وتزامنها سحابياً!', 'success');
         }
 
         function renderTicketPreview(item) {
@@ -703,7 +817,7 @@
         function promptDeleteSingle(id) {
             pendingDeleteId = id;
             isDeletingAll = false;
-            const item = invitations.find(i => i.id === id);
+            const item = (window.invitations || []).find(i => i.id === id);
             
             document.getElementById('delete-modal-title').textContent = "حذف الدعوة";
             document.getElementById('delete-modal-desc').textContent = `هل أنتِ متأكدة من حذف دعوة "${item ? item.name : 'هذه المدعوة'}"؟`;
@@ -711,7 +825,7 @@
         }
 
         function clearAllInvitationsPrompt() {
-            if (invitations.length === 0) {
+            if (!window.invitations || window.invitations.length === 0) {
                 showToast('القائمة فارغة بالفعل', 'info');
                 return;
             }
@@ -722,14 +836,29 @@
             document.getElementById('delete-modal').classList.remove('hidden');
         }
 
-        document.getElementById('confirm-delete-btn').onclick = function() {
+        document.getElementById('confirm-delete-btn').onclick = async function() {
             if (isDeletingAll) {
-                invitations = [];
+                if (window.firebaseStore && window.firebaseStore.isCloudEnabled) {
+                    try {
+                        const { db, appId, deleteDoc, doc } = window.firebaseStore;
+                        for (const item of (window.invitations || [])) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invitations', item.id));
+                        }
+                    } catch(e) { console.error(e); }
+                }
+                window.invitations = [];
                 saveInvitations();
                 showToast('تم مسح جميع الدعوات بنجاح', 'success');
             } else if (pendingDeleteId) {
-                invitations = invitations.filter(i => i.id !== pendingDeleteId);
-                saveInvitations();
+                if (window.firebaseStore && window.firebaseStore.isCloudEnabled) {
+                    try {
+                        const { db, appId, deleteDoc, doc } = window.firebaseStore;
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invitations', pendingDeleteId));
+                    } catch(e) { console.error(e); }
+                } else {
+                    window.invitations = (window.invitations || []).filter(i => i.id !== pendingDeleteId);
+                    saveInvitations();
+                }
                 showToast('تم حذف الدعوة بنجاح', 'success');
             }
             closeDeleteModal();
@@ -743,15 +872,34 @@
             isDeletingAll = false;
         }
 
-        function toggleAttendance(id) {
-            const index = invitations.findIndex(i => i.id === id);
+        async function toggleAttendance(id) {
+            const index = (window.invitations || []).findIndex(i => i.id === id);
             if (index !== -1) {
-                invitations[index].attended = !invitations[index].attended;
-                invitations[index].attendedTime = invitations[index].attended ? new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : null;
-                saveInvitations();
-                renderAttendeesTable();
-                updateStats();
-                showToast(invitations[index].attended ? 'تم تسجيل الحضور!' : 'تم إلغاء الحضور', 'info');
+                const target = window.invitations[index];
+                const newAttended = !target.attended;
+                const newTime = newAttended ? new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : null;
+
+                if (window.firebaseStore && window.firebaseStore.isCloudEnabled) {
+                    try {
+                        const { db, appId, updateDoc, doc } = window.firebaseStore;
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'invitations', id);
+                        await updateDoc(docRef, { attended: newAttended, attendedTime: newTime });
+                    } catch(e) {
+                        console.error("Cloud update failed:", e);
+                        target.attended = newAttended;
+                        target.attendedTime = newTime;
+                        saveInvitations();
+                        renderAttendeesTable();
+                        updateStats();
+                    }
+                } else {
+                    target.attended = newAttended;
+                    target.attendedTime = newTime;
+                    saveInvitations();
+                    renderAttendeesTable();
+                    updateStats();
+                }
+                showToast(newAttended ? 'تم تسجيل الحضور!' : 'تم إلغاء الحضور', 'info');
             }
         }
 
@@ -759,7 +907,7 @@
             const tbody = document.getElementById('attendees-table-body');
             const searchQuery = document.getElementById('search-attendees').value.toLowerCase();
             
-            const filtered = invitations.filter(i => 
+            const filtered = (window.invitations || []).filter(i => 
                 i.name.toLowerCase().includes(searchQuery) || 
                 i.id.toLowerCase().includes(searchQuery) ||
                 i.grade.toLowerCase().includes(searchQuery)
@@ -812,8 +960,9 @@
         }
 
         function updateStats() {
-            const total = invitations.length;
-            const attended = invitations.filter(i => i.attended).length;
+            const currentList = window.invitations || [];
+            const total = currentList.length;
+            const attended = currentList.filter(i => i.attended).length;
             const remaining = total - attended;
 
             document.getElementById('stat-total').textContent = total;
@@ -902,17 +1051,12 @@
             lastScanTime = now;
 
             const toast = document.getElementById('scan-result-toast');
-            const match = invitations.find(i => i.id === cleanCode);
+            const match = (window.invitations || []).find(i => i.id === cleanCode);
 
             if (match) {
                 if (!match.attended) {
                     // FIRST SCAN: ENTRY GRANTED
-                    match.attended = true;
-                    match.scanCount = 1;
-                    match.attendedTime = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-                    saveInvitations();
-                    updateStats();
-                    renderAttendeesTable();
+                    toggleAttendance(match.id);
                     playScanSound('success');
 
                     toast.className = "p-4 rounded-2xl text-xs font-bold text-center bg-emerald-950/90 text-emerald-300 border-2 border-emerald-500 shadow-lg shadow-emerald-500/30 transition-all duration-300";
@@ -922,12 +1066,10 @@
                             <span>تم الدخول بنجاح!</span>
                         </div>
                         <div class="text-white text-base font-extrabold my-1">${match.name}</div>
-                        <div class="text-[11px] text-emerald-200/90"><i class="fa-solid fa-graduation-cap"></i> ${match.grade} • ${match.attendedTime}</div>
+                        <div class="text-[11px] text-emerald-200/90"><i class="fa-solid fa-graduation-cap"></i> ${match.grade}</div>
                     `;
                 } else {
                     // DUPLICATE SCAN: ALARM & WARNING
-                    match.scanCount = (match.scanCount || 1) + 1;
-                    saveInvitations();
                     playScanSound('warning');
 
                     toast.className = "p-4 rounded-2xl text-xs font-bold text-center bg-red-950/95 text-red-200 border-2 border-red-500 shadow-xl shadow-red-600/40 transition-all duration-300";
@@ -938,7 +1080,6 @@
                         </div>
                         <div class="text-white text-base font-extrabold my-1">${match.name}</div>
                         <div class="text-xs text-amber-300 font-bold mb-1">دخلت القاعة بالفعل الساعة: (${match.attendedTime || 'سابقاً'})</div>
-                        <div class="text-[10px] text-red-300/80">عدد مرات مسح الرمز: ${match.scanCount} مرة</div>
                     `;
                 }
             } else {
@@ -970,15 +1111,14 @@
 
         function exportToExcel(type = 'attended') {
             const dataToExport = type === 'attended' 
-                ? invitations.filter(i => i.attended)
-                : invitations;
+                ? (window.invitations || []).filter(i => i.attended)
+                : (window.invitations || []);
 
             if (dataToExport.length === 0) {
                 showToast(type === 'attended' ? 'لا توجد أسماء حاضرات لتصديرهن!' : 'لا توجد بيانات لتصديرها!', 'info');
                 return;
             }
 
-            // Map data to structured Arabic columns for Excel
             const formattedData = dataToExport.map((item, index) => ({
                 "م": index + 1,
                 "الاسم الكامل": item.name,
@@ -989,29 +1129,20 @@
                 "توقيت تسجيل الحضور": item.attendedTime || '-'
             }));
 
-            // Create Excel worksheet
             const worksheet = XLSX.utils.json_to_sheet(formattedData);
-            
-            // Set Right-To-Left view for Arabic text in Excel
             worksheet['!views'] = [{ RTL: true }];
 
             const workbook = XLSX.utils.book_new();
             const sheetTitle = type === 'attended' ? 'كشف الحاضرات' : 'جميع المدعوات';
             XLSX.utils.book_append_sheet(workbook, worksheet, sheetTitle);
 
-            // Generate file name with date
             const today = new Date().toISOString().slice(0, 10);
             const filename = type === 'attended' 
                 ? `كشف_الحاضرات_خدمة_ثانوي_${today}.xlsx` 
                 : `كشف_المدعوات_الكامل_${today}.xlsx`;
 
-            // Trigger download
             XLSX.writeFile(workbook, filename);
             showToast('تم استخراج وتحميل ملف Excel بنجاح! 📊', 'success');
-        }
-
-        function saveInvitations() {
-            localStorage.setItem('girl_service_invitations', JSON.stringify(invitations));
         }
 
         function showToast(message, type = 'info') {
